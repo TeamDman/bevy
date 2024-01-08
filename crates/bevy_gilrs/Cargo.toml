@@ -18,5 +18,7 @@ bevy_utils = { path = "../bevy_utils", version = "0.12.1" }
 bevy_time = { path = "../bevy_time", version = "0.12.1" }
 
 # other
-gilrs = "0.10.1"
+# gilrs = "0.10.1"
+gilrs = { version = "0.10.1", features = ["xinput"], default_features = false }
+
 thiserror = "1.0"
