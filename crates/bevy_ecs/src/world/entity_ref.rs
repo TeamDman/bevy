@@ -2670,9 +2670,6 @@ impl<'w> EntityWorldMut<'w> {
                             table_row: swapped_location.table_row,
                         }),
                     );
-                    world
-                        .entities
-                        .mark_spawn_despawn(swapped_entity.index(), caller, change_tick);
                 }
             }
             table_row = remove_result.table_row;
@@ -2702,14 +2699,18 @@ impl<'w> EntityWorldMut<'w> {
                         table_row,
                     }),
                 );
-                world
-                    .entities
-                    .mark_spawn_despawn(moved_entity.index(), caller, change_tick);
             }
             world.archetypes[moved_location.archetype_id]
                 .set_entity_table_row(moved_location.archetype_row, table_row);
         }
         world.flush();
+
+        // SAFETY: `self.entity` is a valid entity index
+        unsafe {
+            world
+                .entities
+                .mark_spawn_despawn(self.entity.index(), caller, change_tick);
+        }
     }
 
     /// Ensures any commands triggered by the actions of Self are applied, equivalent to [`World::flush`]
@@ -3165,16 +3166,23 @@ impl<'w> EntityWorldMut<'w> {
         })
     }
 
-    /// Deprecated. Use [`World::trigger`] instead.
+    /// Passes the current entity into the given function, and triggers the [`EntityEvent`] returned by that function.
+    /// See [`EntityCommands::trigger`] for usage examples
+    ///
+    /// [`EntityCommands::trigger`]: crate::system::EntityCommands::trigger
     #[track_caller]
-    #[deprecated(
-        since = "0.17.0",
-        note = "Use World::trigger with an EntityEvent instead."
-    )]
-    pub fn trigger<'t>(&mut self, event: impl EntityEvent<Trigger<'t>: Default>) -> &mut Self {
-        log::warn!("EntityWorldMut::trigger is deprecated and no longer triggers the event for the current EntityWorldMut entity. Use World::trigger instead with an EntityEvent.");
+    pub fn trigger<'t, E: EntityEvent<Trigger<'t>: Default>>(
+        &mut self,
+        event_fn: impl FnOnce(Entity) -> E,
+    ) -> &mut Self {
+        let mut event = (event_fn)(self.entity);
+        let caller = MaybeLocation::caller();
         self.world_scope(|world| {
-            world.trigger(event);
+            world.trigger_ref_with_caller(
+                &mut event,
+                &mut <E::Trigger<'_> as Default>::default(),
+                caller,
+            );
         });
         self
     }
@@ -6732,5 +6740,29 @@ mod tests {
                 b: false,
             }
         );
+    }
+
+    #[test]
+    fn spawned_after_swap_remove() {
+        #[derive(Component)]
+        struct Marker;
+
+        let mut world = World::new();
+        let id1 = world.spawn(Marker).id();
+        let _id2 = world.spawn(Marker).id();
+        let id3 = world.spawn(Marker).id();
+
+        #[cfg(feature = "track_location")]
+        let e1_spawned = world.entity(id1).spawned_by();
+
+        let spawn = world.entity(id3).spawned_by();
+        world.entity_mut(id1).despawn();
+        #[cfg(feature = "track_location")]
+        let e1_despawned = world.entities().entity_get_spawned_or_despawned_by(id1);
+        #[cfg(feature = "track_location")]
+        assert_ne!(e1_spawned.map(Some), e1_despawned);
+
+        let spawn_after = world.entity(id3).spawned_by();
+        assert_eq!(spawn, spawn_after);
     }
 }
