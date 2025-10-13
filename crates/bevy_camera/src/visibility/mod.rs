@@ -25,6 +25,8 @@ use crate::{
 };
 use bevy_mesh::{mark_3d_meshes_as_changed_if_their_assets_changed, Mesh, Mesh2d, Mesh3d};
 
+#[cfg(feature = "trace")]
+use tracing::info_span;
 #[derive(Component, Default)]
 pub struct NoCpuCulling;
 
@@ -551,12 +553,19 @@ pub fn check_visibility(
         if !camera.is_active {
             continue;
         }
+        
+        #[cfg(feature = "trace")]
+        let _view_span = info_span!("for_view").entered();
 
         let view_mask = maybe_view_mask.unwrap_or_default();
 
         visible_aabb_query.par_iter_mut().for_each_init(
             || thread_queues.borrow_local_mut(),
             |queue, query_item| {
+                
+                #[cfg(feature = "trace")]
+                let _aabb_span = info_span!("for_visible_aabb").entered();
+                
                 let (
                     entity,
                     inherited_visibility,
@@ -627,6 +636,10 @@ pub fn check_visibility(
         visible_entities.clear_all();
 
         // Drain all the thread queues into the `visible_entities` list.
+        
+        #[cfg(feature = "trace")]
+        let _drain_span = info_span!("drain_visible_entities").entered();
+
         for class_queues in thread_queues.iter_mut() {
             for (class, entities) in class_queues {
                 let visible_entities_for_class = visible_entities.get_mut(*class);

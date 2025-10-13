@@ -12,6 +12,7 @@ categories = ["game-engines", "graphics", "gui", "rendering"]
 [features]
 trace = [
   "bevy_app/trace",
+  "bevy_camera/trace",
   "bevy_asset?/trace",
   "bevy_core_pipeline?/trace",
   "bevy_anti_alias?/trace",

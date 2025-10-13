@@ -34,9 +34,16 @@ thiserror = { version = "2", default-features = false }
 downcast-rs = { version = "2", default-features = false, features = ["std"] }
 derive_more = { version = "2", default-features = false, features = ["from"] }
 smallvec = { version = "1", default-features = false, features = ["const_new"] }
+tracing = { version = "0.1", default-features = false, optional = true }
 
 [features]
 default = []
+
+# Debugging Features
+
+## Enables `tracing` integration, allowing spans and other metrics to be reported
+## through that framework.
+trace = ["dep:tracing"]
 
 [lints]
 workspace = true
