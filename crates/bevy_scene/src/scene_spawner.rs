@@ -1,5 +1,6 @@
 use crate::{DynamicScene, Scene};
 use bevy_asset::{AssetEvent, AssetId, Assets, Handle};
+use bevy_ecs::prelude::ReflectResource;
 use bevy_ecs::{
     entity::{Entity, EntityHashMap},
     event::EntityEvent,
@@ -38,7 +39,7 @@ pub struct SceneInstanceReady {
 }
 
 /// Information about a scene instance.
-#[derive(Debug)]
+#[derive(Debug, Reflect)]
 struct InstanceInfo {
     /// Mapping of entities from the scene world to the instance world.
     entity_map: EntityHashMap<Entity>,
@@ -79,9 +80,12 @@ impl InstanceId {
 /// - [`despawn`](Self::despawn)
 /// - [`despawn_dynamic`](Self::despawn_dynamic)
 /// - [`despawn_instance`](Self::despawn_instance)
-#[derive(Default, Resource)]
+#[derive(Default, Resource, Reflect)]
+#[reflect(Resource)]
 pub struct SceneSpawner {
+    #[reflect(ignore)] // https://github.com/bevyengine/bevy/discussions/16656#discussioncomment-12358032
     pub(crate) spawned_scenes: HashMap<AssetId<Scene>, HashSet<InstanceId>>,
+    #[reflect(ignore)] // https://github.com/bevyengine/bevy/discussions/16656#discussioncomment-12358032
     pub(crate) spawned_dynamic_scenes: HashMap<AssetId<DynamicScene>, HashSet<InstanceId>>,
     spawned_instances: HashMap<InstanceId, InstanceInfo>,
     scene_asset_event_reader: MessageCursor<AssetEvent<Scene>>,
@@ -665,7 +669,7 @@ pub fn scene_spawner_system(world: &mut World) {
 
 /// [`InstanceId`] of a spawned scene. It can be used with the [`SceneSpawner`] to
 /// interact with the spawned scene.
-#[derive(Component, Deref, DerefMut)]
+#[derive(Component, Deref, DerefMut, Reflect)]
 pub struct SceneInstance(pub(crate) InstanceId);
 
 /// System that will spawn scenes from the [`SceneRoot`] and [`DynamicSceneRoot`] components.

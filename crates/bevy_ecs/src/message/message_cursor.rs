@@ -1,3 +1,5 @@
+use bevy_reflect::Reflect;
+
 use crate::message::{
     Message, MessageIterator, MessageIteratorWithId, MessageMutIterator, MessageMutIteratorWithId,
     Messages,
@@ -50,9 +52,10 @@ use core::marker::PhantomData;
 ///
 /// [`MessageReader`]: super::MessageReader
 /// [`MessageMutator`]: super::MessageMutator
-#[derive(Debug)]
+#[derive(Debug, Reflect)]
 pub struct MessageCursor<E: Message> {
     pub(super) last_message_count: usize,
+    #[reflect(ignore)]
     pub(super) _marker: PhantomData<E>,
 }
 
