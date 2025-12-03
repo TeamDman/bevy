@@ -553,7 +553,7 @@ pub fn check_visibility(
         if !camera.is_active {
             continue;
         }
-        
+
         #[cfg(feature = "trace")]
         let _view_span = info_span!("for_view").entered();
 
@@ -562,10 +562,9 @@ pub fn check_visibility(
         visible_aabb_query.par_iter_mut().for_each_init(
             || thread_queues.borrow_local_mut(),
             |queue, query_item| {
-                
                 #[cfg(feature = "trace")]
                 let _aabb_span = info_span!("for_visible_aabb").entered();
-                
+
                 let (
                     entity,
                     inherited_visibility,
@@ -641,7 +640,7 @@ pub fn check_visibility(
         visible_entities.clear_all();
 
         // Drain all the thread queues into the `visible_entities` list.
-        
+
         #[cfg(feature = "trace")]
         let _drain_span = info_span!("drain_visible_entities").entered();
 

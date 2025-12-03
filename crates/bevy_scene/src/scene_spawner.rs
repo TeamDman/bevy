@@ -83,9 +83,11 @@ impl InstanceId {
 #[derive(Default, Resource, Reflect)]
 #[reflect(Resource)]
 pub struct SceneSpawner {
-    #[reflect(ignore)] // https://github.com/bevyengine/bevy/discussions/16656#discussioncomment-12358032
+    #[reflect(ignore)]
+    // https://github.com/bevyengine/bevy/discussions/16656#discussioncomment-12358032
     pub(crate) spawned_scenes: HashMap<AssetId<Scene>, HashSet<InstanceId>>,
-    #[reflect(ignore)] // https://github.com/bevyengine/bevy/discussions/16656#discussioncomment-12358032
+    #[reflect(ignore)]
+    // https://github.com/bevyengine/bevy/discussions/16656#discussioncomment-12358032
     pub(crate) spawned_dynamic_scenes: HashMap<AssetId<DynamicScene>, HashSet<InstanceId>>,
     spawned_instances: HashMap<InstanceId, InstanceInfo>,
     scene_asset_event_reader: MessageCursor<AssetEvent<Scene>>,
