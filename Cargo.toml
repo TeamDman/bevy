@@ -4250,6 +4250,17 @@ category = "Camera"
 wasm = true
 
 [[example]]
+name = "camera_focus"
+path = "examples/teamy/camera_focus.rs"
+doc-scrape-examples = true
+
+[package.metadata.example.camera_focus]
+name = "Camera Focus Controller"
+description = "Demonstrates mesh picking driven focus/orbit controls with a shader-based glow outline."
+category = "Camera"
+wasm = false
+
+[[example]]
 name = "2d_screen_shake"
 path = "examples/camera/2d_screen_shake.rs"
 doc-scrape-examples = true
