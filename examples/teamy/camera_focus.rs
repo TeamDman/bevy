@@ -115,7 +115,7 @@ struct RainbowOutlineExtension {
 impl Default for RainbowOutlineExtension {
     fn default() -> Self {
         Self {
-            glow_control: Vec4::new(0.0, 0.0, 2.5, 0.0),
+            glow_control: Vec4::new(0.0, 0.0, 2.5, 0.35),
         }
     }
 }
@@ -127,6 +127,10 @@ impl RainbowOutlineExtension {
 
     fn set_phase(&mut self, phase: f32) {
         self.glow_control.y = phase;
+    }
+
+    fn set_outline_width(&mut self, width: f32) {
+        self.glow_control.w = width;
     }
 }
 
@@ -397,6 +401,7 @@ fn drive_outline_materials(
             material.extension.set_phase(phase);
             let glow_strength = if Some(entity) == rig.focus { 1.0 } else { 0.0 };
             material.extension.set_glow_strength(glow_strength);
+            material.extension.set_outline_width(0.45);
         }
     }
 }

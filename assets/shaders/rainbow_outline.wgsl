@@ -50,9 +50,14 @@ fn fragment(
     if glow_strength > 0.0 {
         let exponent = max(rainbow_outline.glow_control.z, 0.1);
         let rim = rim_intensity(pbr_input.N, pbr_input.V, exponent);
-        let rainbow = rainbow_color(rainbow_outline.glow_control.y);
-        let glow = rainbow * rim * glow_strength;
-        out.color = vec4<f32>(out.color.rgb + glow, out.color.a);
+        let width = clamp(rainbow_outline.glow_control.w, 0.01, 0.9);
+        let outline_mask = smoothstep(1.0 - width, 1.0, rim);
+        if outline_mask > 0.0 {
+            let angle = atan2(pbr_input.world_normal.z, pbr_input.world_normal.x);
+            let rainbow = rainbow_color(rainbow_outline.glow_control.y + angle);
+            let glow = rainbow * outline_mask * glow_strength;
+            out.color = vec4<f32>(out.color.rgb + glow, out.color.a);
+        }
     }
 
     out.color = main_pass_post_lighting_processing(pbr_input, out.color);
